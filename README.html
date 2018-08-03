@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" href="pandoc.css" type="text/css" />
+</head>
+<body>
+<h1 id="publisher-api">Publisher API</h1>
+<p>The Yewno Semantic API enables users to retrieve comprehensive information on topics, subtopics and concepts from any English language item in the relevant portfolio that they have access to. This information has a variety of uses and can be displayed both internally and externally to end users. Overall, the Yewno Sematic API is composed of six related APIs: Concept Search, Concept Metadata, Document Search, Document Metadata, Document Snippets and Topics outlined below.</p>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li>Only support <code>json</code> content bodies.</li>
+<li>Every API request must contain a JWT token.</li>
+<li><em>This is a draft spec, specific response fields may change</em></li>
+</ul>
+<h2 id="glossary">Glossary</h2>
+<p><strong>Concept</strong>: An abstract idea that may refer to one or more terms. e.g. <em>Brexit</em>, <em>United Kingdom European Union membership referendum, 2016</em><br />
+<strong>Document</strong>: A piece of content; book, chapter, article, etc.<br />
+<strong>Topic</strong>: A high level concept classification that may be further divided into specific subtopics. eg <em>'cat'</em><br />
+<strong>Subtopic</strong>: A more granular concept classification beneath a topic, eg <em>'Ragdoll'</em> (cat breed).<br />
+<strong>yid</strong>: a globally unique id assigned to each document resource. eg <code>1f84027593d21e4f3a01ef676bebf4db</code><br />
+<strong>cid</strong>: a globally unique id assigned to each concept eg <code>1a267fae7720d4bfc71abd6494611cf5</code></p>
+<h2 id="authentication">Authentication</h2>
+<p>All requests must be accompanied by a <a href="https://jwt.io/introduction/">jwt</a> obtained by logging in with a registered account.</p>
+<h3 id="registration">Registration</h3>
+<p>Visit <code>https://auth.yewno.com/register</code> to register for an account.</p>
+<h3 id="obtaining-a-jwt">Obtaining a JWT</h3>
+<p>Once registered, you may acquire a jwt from the authentication gateway. All jwts expire 24hrs after they are issued. You may also request a refresh token with the optional <code>permanent</code> field. This refresh token is tied to your current ip address and will not renew your session from another address.</p>
+<pre><code>POST https://auth.yewno.com/api/login
+
+{
+  &quot;email&quot;: &quot;youremail@yourdomain.com&quot;,
+  &quot;password&quot;: &quot;your password&quot;,
+  &quot;permanent&quot;: true
+}</code></pre>
+<p>This provided token must be present in each request as a standard formatted authorization bearer token. In other words, all API requests must include the following authorization header:</p>
+<pre><code>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</code></pre>
+<h3 id="associating-with-an-institute">Associating with an institute</h3>
+<p>To use the API, your account must be associated with a institute. Contact Yewno for a token and POST it to:</p>
+<pre><code>POST https://auth.stage.yewno.io/api/account/coupon
+
+{
+  &quot;code&quot;: &quot;YOURCODEHERE&quot;
+}</code></pre>
+<p>Once you have applied this request, you will need to obtain a new JWT that contains the newly acquired association.</p>
+<h3 id="renew-session">Renew Session</h3>
+<p>To renew the session, post the refresh token to <code>https://auth.yewno.com/auth/refresh</code>:</p>
+<pre><code>POST /auth/refresh
+{
+  &quot;refresh&quot;: &quot;24e19203-57cd-4eec-ad56-5ad35b1afdaf&quot;
+}</code></pre>
+<h2 id="concept-search">Concept Search</h2>
+<p>Concept search API returns most pertinent concept(s) matched to a query string. It handles misspelled or partial data, as well as synonyms. For every concept returned, the API provides its id within Yewno ecosystem (cid), together with concept title and short definition. Additional metadata for a given yid can be obtained through the Concept Metadata API (see below). We limit the number of returned concepts to 10.</p>
+<pre><code>GET /concept/search?q=&lt;string&gt;</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>param</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>q</td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><details></p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+    <span class="fu">{</span>
+      <span class="dt">&quot;definitions&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="fu">{</span>
+            <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.9</span><span class="fu">,</span>
+            <span class="dt">&quot;resource&quot;</span><span class="fu">:</span> <span class="st">&quot;wikipedia:25202&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;year&quot;</span><span class="fu">:</span> <span class="st">&quot;2017&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Quantum mechanics (QM; also known as quantum physics or quantum theory), including quantum field theory, is a branch of physics which is the fundamental theory of nature at the small scales and energy levels of atoms and subatomic particles. Classical physics (the physics existing before quantum mechanics) derives from quantum mechanics as an approximation valid only at large (macroscopic) scales. Quantum mechanics differs from classical physics in that: energy, momentum and other quantities are often restricted to discrete values (quantization), objects have characteristics of both particles and waves (i.e. wave-particle duality), and there are limits to the precision with which quantities can be known (uncertainty principle). (Landau &amp; Lifshitz, 1977) Quantum mechanics gradually arose from Max Planck&#39;s solution in 1900 to the black-body radiation problem (reported 1859) and Albert Einstein&#39;s 1905 paper which offered a quantum-based theory to explain the photoelectric effect (reported 1887).&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;Wikipedia&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;wikipedia&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;b97718aa9aed76997c404f5965ac629c&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Quantum mechanics&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://en.wikipedia.org/wiki/Quantum_mechanics&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;sourceLabel&quot;</span><span class="fu">:</span> <span class="st">&quot;wikipedia&quot;</span>
+        <span class="fu">}</span>
+      <span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;cId&quot;</span><span class="fu">:</span> <span class="st">&quot;1a267fae7720d4bfc71abd6494611cf5&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;topics&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="fu">{</span>
+          <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;21&quot;</span><span class="fu">,</span>
+          <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.53311855</span><span class="fu">,</span>
+          <span class="dt">&quot;children&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+            <span class="fu">{</span>
+              <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;21_22&quot;</span><span class="fu">,</span>
+              <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.85977834</span><span class="fu">,</span>
+              <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;21_22&quot;</span><span class="fu">,</span>
+              <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Quantum Theory&quot;</span>
+            <span class="fu">}</span>
+          <span class="ot">]</span><span class="fu">,</span>
+          <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;21&quot;</span><span class="fu">,</span>
+          <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Physics&quot;</span>
+        <span class="fu">}</span><span class="ot">,</span>
+        <span class="fu">{</span>
+          <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;23&quot;</span><span class="fu">,</span>
+          <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.16696094</span><span class="fu">,</span>
+          <span class="dt">&quot;children&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+            <span class="fu">{</span>
+              <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;23_5&quot;</span><span class="fu">,</span>
+              <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.7479905</span><span class="fu">,</span>
+              <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;23_5&quot;</span><span class="fu">,</span>
+              <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Cognitive Science&quot;</span>
+            <span class="fu">}</span><span class="ot">,</span>
+            <span class="fu">{</span>
+              <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;23_6&quot;</span><span class="fu">,</span>
+              <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.20375429</span><span class="fu">,</span>
+              <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;23_6&quot;</span><span class="fu">,</span>
+              <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Connectionism&quot;</span>
+            <span class="fu">}</span>
+          <span class="ot">]</span><span class="fu">,</span>
+          <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;23&quot;</span><span class="fu">,</span>
+          <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Psychology&quot;</span>
+        <span class="fu">}</span>
+      <span class="ot">]</span><span class="fu">,</span>
+      <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Quantum mechanics&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;imageUrl&quot;</span><span class="fu">:</span> <span class="st">&quot;https://static.yewno.com/assets/thumbnails/concepts/1a267fae7720d4bfc71abd6494611cf5@2x.jpg&quot;</span>
+    <span class="fu">}</span><span class="ot">,</span>
+    <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span>
+  <span class="ot">]</span>
+<span class="fu">}</span></code></pre></div>
+<p></details></p>
+<h2 id="document-search">Document Search</h2>
+<p>Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, provider and date of publication. Additional metadata for a given yid can be obtained through the Document Metadata API (see below).</p>
+<table>
+<thead>
+<tr class="header">
+<th>param</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>q</td>
+<td>string</td>
+</tr>
+<tr class="even">
+<td>stype</td>
+<td>[&quot;topic&quot;, &quot;concept&quot;]</td>
+</tr>
+</tbody>
+</table>
+<p><details></p>
+<pre><code>GET document/search?q=&lt;string&gt;&amp;stype=&lt;string&gt; </code></pre>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+    <span class="fu">{</span>
+      <span class="dt">&quot;yId&quot;</span><span class="fu">:</span> <span class="st">&quot;a53a456a1443b9f2eba1591e35800734&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;stype&quot;</span><span class="fu">:</span> <span class="st">&quot;title&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Newsgames&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;sourceName&quot;</span><span class="fu">:</span> <span class="st">&quot;MIT Press&quot;</span><span class="fu">,</span>
+    <span class="fu">}</span><span class="ot">,</span>
+    <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span>
+  <span class="ot">]</span>
+<span class="fu">}</span></code></pre></div>
+<p></details></p>
+<h2 id="topics">Topics</h2>
+<p>Return topic and subtopic ids that can be used in the document search endpoint.</p>
+<pre><code>GET /topics</code></pre>
+<p><details></p>
+<pre><code>{
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: &quot;22&quot;,
+      &quot;label&quot;: &quot;Political Science&quot;,
+      &quot;subtopics&quot;: [
+        {
+          &quot;id&quot;: &quot;22_7&quot;,
+          &quot;label&quot;: &quot;Health Policy&quot;
+        },
+        /* ... */
+      ]
+    },
+    /* ... */
+  ]
+}</code></pre>
+<p></details></p>
+<h2 id="concept-metadata">Concept Metadata</h2>
+<p>Return a concept and a list of related concepts and edges that connect to the concept.</p>
+<table>
+<thead>
+<tr class="header">
+<th>param</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cid</td>
+<td>string</td>
+</tr>
+<tr class="even">
+<td>related*</td>
+<td>integer</td>
+</tr>
+</tbody>
+</table>
+<p>* optional</p>
+<pre><code>GET /concept/:cid?related=&lt;int&gt;</code></pre>
+<p><details></p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span>
+  <span class="dt">&quot;uuid&quot;</span><span class="fu">:</span> <span class="st">&quot;0deee814-74da-11e8-a038-0242ac110003&quot;</span><span class="fu">,</span>
+  <span class="dt">&quot;cache_disabled&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span>
+  <span class="dt">&quot;meta&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;context&quot;</span><span class="fu">:</span> <span class="ot">[]</span>
+  <span class="fu">},</span>
+  <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;OK&quot;</span><span class="fu">,</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;nodes&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;cId&quot;</span><span class="fu">:</span> <span class="st">&quot;40dec4929a8ad3cda7a90e53394eb03b&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;topics&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+          <span class="fu">{</span>
+            <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;28&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.33009732</span><span class="fu">,</span>
+            <span class="dt">&quot;subtopics&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+              <span class="fu">{</span>
+                <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;28_54&quot;</span><span class="fu">,</span>
+                <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.9117648</span>
+              <span class="fu">}</span>
+            <span class="ot">]</span>
+          <span class="fu">}</span>
+        <span class="ot">]</span><span class="fu">,</span>
+        <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;ABW (TV station)&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;sourceName&quot;</span><span class="fu">:</span> <span class="st">&quot;wikipedia&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;definitions&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+          <span class="fu">{</span>
+            <span class="dt">&quot;resource&quot;</span><span class="fu">:</span> <span class="st">&quot;wikipedia:3165227&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;ABW is the Australian Broadcasting Corporation&#39;s television station in Perth, Western Australia. The station began broadcasting on 7 May 1960 from studios on Adelaide Terrace in downtown Perth and its transmitter at Bickley. The station is relayed throughout the state by a number of transmitters as well as on the Optus Aurora free-to-view satellite television platform. In 2005 the station moved to a new digital broadcast centre in East Perth.&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;ABW (TV station)&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://en.wikipedia.org/wiki/ABW_%28TV_station%29&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;Wikipedia&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;wikipedia&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;score&quot;</span><span class="fu">:</span> <span class="fl">0.9</span><span class="fu">,</span>
+            <span class="dt">&quot;year&quot;</span><span class="fu">:</span> <span class="st">&quot;2017&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;sourceLabel&quot;</span><span class="fu">:</span> <span class="st">&quot;Wikipedia&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;35533cfcc8ff9e787dfe78b62bfe358f&quot;</span>
+          <span class="fu">}</span>
+        <span class="ot">]</span><span class="fu">,</span>
+        <span class="dt">&quot;imageUrls&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+          <span class="st">&quot;https://static.yewno.com/assets/thumbnails/concepts/40dec4929a8ad3cda7a90e53394eb03b@2x.jpg&quot;</span><span class="ot">,</span>
+          <span class="st">&quot;https://static.yewno.com/assets/thumbnails/topics_36/28@2x.jpg&quot;</span>
+        <span class="ot">]</span>
+      <span class="fu">}</span><span class="ot">,</span>
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;edges&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;fe451a8fbf229b87a92fed8cb9289143&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;target&quot;</span><span class="fu">:</span> <span class="st">&quot;8ec2d886c4ab214daff14997506570ad&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;similarity&quot;</span><span class="fu">:</span> <span class="fl">0.9928904233742654</span>
+      <span class="fu">}</span><span class="ot">,</span>
+      <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span><span class="ot">,</span>
+    <span class="ot">]</span>
+  <span class="fu">}</span>
+<span class="fu">}</span></code></pre></div>
+<p></details></p>
+<h2 id="document-metadata">Document Metadata</h2>
+<p>Document metadata returns, for each document id (yid), traditional publisher metadata as well as additional attributes obtained via Yewno advanced AI algorithms. These include the <strong>topics/subtopics</strong> hierarchy together with the <strong>percentage score</strong>, and a list of <strong>extracted concepts</strong> (default response 10, the requester can optionally specify the number of related concepts she/he wants (up to max 100) with an associated <strong>pertinence score</strong>. Traditional metadata includes title, author(s), date of publication, as well as additional metadata depending on the type of document.</p>
+<pre><code>GET /document/:yid</code></pre>
+<p><details></p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;isbn&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;Other costs not included by this term are costs of follow-up literature, miscellaneous advertising materials such as circulars, layouts, letterheads, and calling cards, and cost of advertising agency service. ume of response delivered by different publications, although as mentioned, no substantial difference in the quality, when a known piece of copy was used. In those cases where the same copy appeared in different magazines in the same month, the ratio of orders to inquiries8 was quite similar for most magazines. 3. Direct mail inquiries as producers of traceable sales from both old9 and new10 8 The percentage of inquiries which were converted to orders. 9 A buyer whose first order preceded his first inquiry from advertising in the period measured, yet who did inquire from an advertisement or an editorial article, and who bought again after his inquiry was received.&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;topics&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;11_1&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.8888889</span>
+      <span class="fu">}</span><span class="ot">,</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;11_15&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.11111111</span>
+      <span class="fu">}</span><span class="ot">,</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;12&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;children&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+          <span class="fu">{</span>
+            <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;12_15&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Publishing&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.8322142</span>
+          <span class="fu">}</span><span class="ot">,</span>
+          <span class="fu">{</span>
+            <span class="dt">&quot;topic&quot;</span><span class="fu">:</span> <span class="st">&quot;12_2&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Communication Studies&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.14093931</span>
+          <span class="fu">}</span>
+        <span class="ot">]</span><span class="fu">,</span>
+        <span class="dt">&quot;probability&quot;</span><span class="fu">:</span> <span class="fl">0.13186002</span><span class="fu">,</span>
+        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Language Arts&quot;</span>
+      <span class="fu">}</span><span class="ot">,</span>
+      <span class="er">/*...*/</span>
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;chapterNumber&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;publishedAt&quot;</span><span class="fu">:</span> <span class="st">&quot;2006-04-25T23:52:59Z&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;readtime&quot;</span><span class="fu">:</span> <span class="dv">26</span><span class="fu">,</span>
+    <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Traceable Response as a Method of Evaluating Industrial Advertising: A Case Study&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;article&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;public&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span>
+    <span class="dt">&quot;yId&quot;</span><span class="fu">:</span> <span class="st">&quot;1f84027593d21e4f3a01ef676bebf4db&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;journal_title&quot;</span><span class="fu">:</span> <span class="st">&quot;Journal of Marketing&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;volume&quot;</span><span class="fu">:</span> <span class="st">&quot;12&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;authors&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;lastName&quot;</span><span class="fu">:</span> <span class="st">&quot;Margolis&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;firstName&quot;</span><span class="fu">:</span> <span class="st">&quot;Charles&quot;</span>
+      <span class="fu">}</span>
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;concepts&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+        <span class="fu">{</span>
+            <span class="dt">&quot;cid&quot;</span><span class="fu">:</span> <span class="st">&quot;1a267fae7720d4bfc71abd6494611cf5&quot;</span><span class="fu">,</span>
+            <span class="dt">&quot;pertinence&quot;</span><span class="fu">:</span> 
+        <span class="fu">}</span>
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;publication_date&quot;</span><span class="fu">:</span> <span class="st">&quot;2006-04-25T23:52:59Z&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;eissn&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;chapter&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;publisher&quot;</span><span class="fu">:</span> <span class="st">&quot;JSTOR&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;doi&quot;</span><span class="fu">:</span> <span class="st">&quot;10.2307/1245359&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;sourcesList&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+      <span class="fu">{</span>
+        <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;http://dx.doi.org/10.2307/1245359&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;DISTRIBUTOR&quot;</span><span class="fu">,</span>
+        <span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;JSTOR&quot;</span>
+      <span class="fu">}</span>
+    <span class="ot">]</span><span class="fu">,</span>
+    <span class="dt">&quot;issue&quot;</span><span class="fu">:</span> <span class="st">&quot;2&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;issn&quot;</span><span class="fu">:</span> <span class="st">&quot;00222429&quot;</span>
+  <span class="fu">},</span>
+  <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span>
+<span class="fu">}</span></code></pre></div>
+<p></details></p>
+<h2 id="document-snippets">Document Snippets</h2>
+<p>Snippets endpoints returns, for each concept id (cid), list of snippets (short portions of documents, up to 180 words) where that concept appears, a relevance score, together with essential metadata information. Additional metadata for a given yid can be obtained through the Document Metadata API (see above) for each document id (yid) returned. Snippet call is paginated (with 10 snippets per page), and we limit the number of returned pages to 100.</p>
+<table>
+<thead>
+<tr class="header">
+<th>param</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cid</td>
+<td>string</td>
+</tr>
+<tr class="even">
+<td>yids</td>
+<td>string (comma separated yids)</td>
+</tr>
+</tbody>
+</table>
+<pre><code>GET /snippets/:cid?yids=&lt;string&gt;</code></pre>
+<p><details></p>
+<pre><code>  &quot;snippets&quot;: [
+    {
+      &quot;yId&quot;: &quot;d771a5b0bfd40e85efa9b4359d5a5432&quot;,
+      &quot;score&quot;: 4.0841975,
+      &quot;snippetIndex&quot;: 71,
+      &quot;sId&quot;: &quot;63fc26375ec2343623661e41d7c5887e&quot;,
+      &quot;cmid&quot;: &quot;659462e857811336fb48232d96b9e519&quot;,
+      &quot;text&quot;: &quot; (a) Sketch indicating the rotation of a shuttlecock moving with the cork ahead. Thin blue arrows indicate the drag force on each feather. (b) Rotation velocity R &amp;OHgr; ?&gt; as a function of the translation speed U for a plastic (blue dots) and a feathered shuttlecock (red squares). Shuttlecocks rotate at a velocity such that this torque is balanced by air resistance. The rotational velocity &amp;OHgr; is measured as a function of the projectile speed U , as shown in figure 15 (b). The graph reveals a linear correlation between R &amp;OHgr; ?&gt; and U , and differences between plastic and feather rotational velocities.&quot;,
+      &quot;title&quot;: &quot;The physics of badminton&quot;,
+      &quot;publisher&quot;: &quot;IOP Publishing&quot;,
+      &quot;summary&quot;: &quot;...ed shuttlecock (red squares). Shuttlecocks rotate at a velocity such that this torque is balanced by air resistance. The rotational velocity &amp;OHgr; is measured as a function of the projectile speed U , as shown in figure 15 (b). The graph reveals a linear...&quot;,
+      &quot;publicationDate&quot;: &quot;2015-06-01T00:00:00Z&quot;
+    }
+  ],</code></pre>
+<p></details></p>
+</body>
+</html>

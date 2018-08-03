@@ -1,0 +1,21 @@
+{
+  "name": "bismuth",
+  "version": "0.0.2",
+  "description": "Public API documentation",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -e md -x 'yarn build'",
+    "build": "pandoc -f markdown -t html -o README.html --css pandoc.css README.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yewno/public-API-docs.git"
+  },
+  "author": "Yewno Inc.",
+  "license": "UNLICENSED",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/yewno/public-API-docs/issues"
+  },
+  "homepage": "https://github.com/yewno/public-API-docs#readme"
+}

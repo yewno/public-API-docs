@@ -2,6 +2,8 @@
 
 The Yewno Semantic API enables users to retrieve comprehensive information on topics, subtopics and concepts from any English language item in the relevant portfolio that they have access to. This information has a variety of uses and can be displayed both internally and externally to end users. Overall, the Yewno Sematic API is composed of six related APIs: Concept Search, Concept Metadata, Document Search, Document Metadata, Document Snippets and Topics outlined below. 
 
+The base url for all endpoints is `https://apis.yewno.com/public`.  All requests must be made over HTTPS as HTTP is not supported.  
+
 ## Assumptions
 - Only support `json` content bodies.
 - Every API request must contain a JWT token.
@@ -48,14 +50,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3O
 To use the API, your account must be associated with a institute.  Contact Yewno for a token and POST it to: 
 
 ```
-POST https://auth.stage.yewno.io/api/account/coupon
+POST https://auth.yewno.com/api/account/coupon
 
 {
   "code": "YOURCODEHERE"
 }
 ```
 
-Once you have applied this request, you will need to obtain a new JWT that contains the newly acquired association.
+Once you have applied this request, you will need to obtain a new JWT that contains the newly acquired association.  You can verify access by decoding the newly created JWT and noting additional entries in the `roles` field.
 
 ### Renew Session
 

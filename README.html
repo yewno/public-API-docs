@@ -170,63 +170,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
   <span class="ot">]</span>
 <span class="fu">}</span></code></pre></div>
 <p></details></p>
-<h2 id="document-search">Document Search</h2>
-<p>Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, provider and date of publication. Additional metadata for a given yid can be obtained through the Document Metadata API (see below).</p>
-<table>
-<thead>
-<tr class="header">
-<th>param</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>q</td>
-<td>string</td>
-</tr>
-<tr class="even">
-<td>stype</td>
-<td>[&quot;topic&quot;, &quot;concept&quot;]</td>
-</tr>
-</tbody>
-</table>
-<p><details></p>
-<pre><code>GET document/search?q=&lt;string&gt;&amp;stype=&lt;string&gt; </code></pre>
-<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
-  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
-    <span class="fu">{</span>
-      <span class="dt">&quot;yId&quot;</span><span class="fu">:</span> <span class="st">&quot;a53a456a1443b9f2eba1591e35800734&quot;</span><span class="fu">,</span>
-      <span class="dt">&quot;stype&quot;</span><span class="fu">:</span> <span class="st">&quot;title&quot;</span><span class="fu">,</span>
-      <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Newsgames&quot;</span><span class="fu">,</span>
-      <span class="dt">&quot;sourceName&quot;</span><span class="fu">:</span> <span class="st">&quot;MIT Press&quot;</span><span class="fu">,</span>
-    <span class="fu">}</span><span class="ot">,</span>
-    <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span>
-  <span class="ot">]</span>
-<span class="fu">}</span></code></pre></div>
-<p></details></p>
-<h2 id="topics">Topics</h2>
-<p>Return topic and subtopic ids that can be used in the document search endpoint.</p>
-<pre><code>GET /topics</code></pre>
-<p><details></p>
-<pre><code>{
-  &quot;data&quot;: [
-    {
-      &quot;id&quot;: &quot;22&quot;,
-      &quot;label&quot;: &quot;Political Science&quot;,
-      &quot;subtopics&quot;: [
-        {
-          &quot;id&quot;: &quot;22_7&quot;,
-          &quot;label&quot;: &quot;Health Policy&quot;
-        },
-        /* ... */
-      ]
-    },
-    /* ... */
-  ]
-}</code></pre>
-<p></details></p>
 <h2 id="concept-metadata">Concept Metadata</h2>
-<p>Return a concept and a list of related concepts and edges that connect to the concept.</p>
+<p>Concept metadata returns, for each concept id (cid), additional attributes obtained via Yewno advanced AI processes. These include the topics/subtopics hierarchy together with a percentage for each, definitions and a list of related concept CIDs (up to 100) extracted from multiple sources (depending on the portfolio a particular user has access to).</p>
 <table>
 <thead>
 <tr class="header">
@@ -303,6 +248,40 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span><span class="ot">,</span>
     <span class="ot">]</span>
   <span class="fu">}</span>
+<span class="fu">}</span></code></pre></div>
+<p></details></p>
+<h2 id="document-search">Document Search</h2>
+<p>Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, provider and date of publication. Additional metadata for a given yid can be obtained through the Document Metadata API (see below).</p>
+<table>
+<thead>
+<tr class="header">
+<th>param</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>q</td>
+<td>string</td>
+</tr>
+<tr class="even">
+<td>stype</td>
+<td>[&quot;topic&quot;, &quot;concept&quot;]</td>
+</tr>
+</tbody>
+</table>
+<p><details></p>
+<pre><code>GET document/search?q=&lt;string&gt;&amp;stype=&lt;string&gt; </code></pre>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
+  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
+    <span class="fu">{</span>
+      <span class="dt">&quot;yId&quot;</span><span class="fu">:</span> <span class="st">&quot;a53a456a1443b9f2eba1591e35800734&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;stype&quot;</span><span class="fu">:</span> <span class="st">&quot;title&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Newsgames&quot;</span><span class="fu">,</span>
+      <span class="dt">&quot;sourceName&quot;</span><span class="fu">:</span> <span class="st">&quot;MIT Press&quot;</span><span class="fu">,</span>
+    <span class="fu">}</span><span class="ot">,</span>
+    <span class="er">/*</span> <span class="er">...</span> <span class="er">*/</span>
+  <span class="ot">]</span>
 <span class="fu">}</span></code></pre></div>
 <p></details></p>
 <h2 id="document-metadata">Document Metadata</h2>
@@ -416,6 +395,27 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       &quot;publicationDate&quot;: &quot;2015-06-01T00:00:00Z&quot;
     }
   ],</code></pre>
+<p></details></p>
+<h2 id="topics">Topics</h2>
+<p>Return topic and subtopic ids that can be used in the document search endpoint.</p>
+<pre><code>GET /topics</code></pre>
+<p><details></p>
+<pre><code>{
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: &quot;22&quot;,
+      &quot;label&quot;: &quot;Political Science&quot;,
+      &quot;subtopics&quot;: [
+        {
+          &quot;id&quot;: &quot;22_7&quot;,
+          &quot;label&quot;: &quot;Health Policy&quot;
+        },
+        /* ... */
+      ]
+    },
+    /* ... */
+  ]
+}</code></pre>
 <p></details></p>
 </body>
 </html>

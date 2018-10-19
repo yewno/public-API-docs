@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/yewno/public-API-docs/issues"
   },
-  "homepage": "https://github.com/yewno/public-API-docs#readme"
+  "homepage": "https://github.com/yewno/public-API-docs#readme",
+  "dependencies": {
+    "nodemon": "^1.18.4"
+  }
 }

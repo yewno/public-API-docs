@@ -150,70 +150,9 @@ GET /concept/search?q=<string>
 
 </details>
 
-## Document Search
-
-Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, provider and date of publication.  Additional metadata for a given yid can be obtained through the Document Metadata API (see below).
-
-| param | |
-|---|---|
-| q  | string  |
-| stype  | ["topic", "concept"]  |
-
-<details>
-
-```
-GET document/search?q=<string>&stype=<string> 
-```
-```json
-{
-  "data": [
-    {
-      "yId": "a53a456a1443b9f2eba1591e35800734",
-      "stype": "title",
-      "title": "Newsgames",
-      "sourceName": "MIT Press",
-    },
-    /* ... */
-  ]
-}
-```
-
-</details>
-
-## Topics
-
-Return topic and subtopic ids that can be used in the document search endpoint.
-
-```
-GET /topics
-```
-
-<details>
-
-```
-{
-  "data": [
-    {
-      "id": "22",
-      "label": "Political Science",
-      "subtopics": [
-        {
-          "id": "22_7",
-          "label": "Health Policy"
-        },
-        /* ... */
-      ]
-    },
-    /* ... */
-  ]
-}
-```
-
-</details>
-
 ## Concept Metadata
 
-Return a concept and a list of related concepts and edges that connect to the concept.
+Concept metadata returns, for each concept id (cid), additional attributes obtained via Yewno advanced AI processes. These include the topics/subtopics hierarchy together with a percentage for each, definitions and a list of related concept CIDs (up to 100) extracted from multiple sources (depending on the portfolio a particular user has access to).
 
 | param | type |
 |---|---|
@@ -284,6 +223,36 @@ GET /concept/:cid?related=<int>
       /* ... */,
     ]
   }
+}
+```
+
+</details>
+
+## Document Search
+
+Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, provider and date of publication.  Additional metadata for a given yid can be obtained through the Document Metadata API (see below).
+
+| param | |
+|---|---|
+| q  | string  |
+| stype  | ["topic", "concept"]  |
+
+<details>
+
+```
+GET document/search?q=<string>&stype=<string> 
+```
+```json
+{
+  "data": [
+    {
+      "yId": "a53a456a1443b9f2eba1591e35800734",
+      "stype": "title",
+      "title": "Newsgames",
+      "sourceName": "MIT Press",
+    },
+    /* ... */
+  ]
 }
 ```
 
@@ -408,4 +377,33 @@ GET /snippets/:cid?yids=<string>
 
 </details>
 
+## Topics
 
+Return topic and subtopic ids that can be used in the document search endpoint.
+
+```
+GET /topics
+```
+
+<details>
+
+```
+{
+  "data": [
+    {
+      "id": "22",
+      "label": "Political Science",
+      "subtopics": [
+        {
+          "id": "22_7",
+          "label": "Health Policy"
+        },
+        /* ... */
+      ]
+    },
+    /* ... */
+  ]
+}
+```
+
+</details>

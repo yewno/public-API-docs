@@ -261,17 +261,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </thead>
 <tbody>
 <tr class="odd">
-<td>q</td>
-<td>string</td>
+<td>concepts</td>
+<td>string (comma separated cids)</td>
 </tr>
 <tr class="even">
-<td>stype</td>
-<td>[&quot;topic&quot;, &quot;concept&quot;]</td>
+<td>topics</td>
+<td>string (comma separated ids)</td>
 </tr>
 </tbody>
 </table>
 <p><details></p>
-<pre><code>GET document/search?q=&lt;string&gt;&amp;stype=&lt;string&gt; </code></pre>
+<pre><code>GET document/search?concepts=&lt;cids&gt;&amp;topics=&lt;topic_ids&gt;</code></pre>
 <div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="fu">{</span>
   <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span>
     <span class="fu">{</span>

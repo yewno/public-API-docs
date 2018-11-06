@@ -152,7 +152,7 @@ GET /concept/search?q=<string>
 
 ## Concept Metadata
 
-Concept metadata returns, for each concept id (cid), additional attributes obtained via Yewno advanced AI processes. These include the topics/subtopics hierarchy together with a percentage for each, definitions and a list of related concept CIDs (up to 100) extracted from multiple sources (depending on the portfolio a particular user has access to).
+Concept metadata returns, for each concept id (cid), additional attributes obtained via Yewno advanced AI processes. These include the topics/subtopics hierarchy together with a percentage for each, definitions and a list of related concept CIDs (up to 10) extracted from multiple sources (depending on the portfolio a particular user has access to).
 
 | param | type |
 |---|---|
@@ -234,13 +234,13 @@ Document search API returns most relevant document(s) matched to either a concep
 
 | param | |
 |---|---|
-| q  | string  |
-| stype  | ["topic", "concept"]  |
+| concepts | string (comma separated cids)  |
+| topics | string (comma separated ids) |
 
 <details>
 
 ```
-GET document/search?q=<string>&stype=<string> 
+GET document/search?concepts=<cids>&topics=<topic_ids>
 ```
 ```json
 {

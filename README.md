@@ -1,6 +1,6 @@
 # Publisher API
 
-The Yewno Semantic API enables users to retrieve comprehensive information on topics, subtopics and concepts from any English language item in the relevant portfolio that they have access to. This information has a variety of uses and can be displayed both internally and externally to end users. Overall, the Yewno Sematic API is composed of six related APIs: Concept Search, Concept Metadata, Document Search, Document Metadata, Document Snippets and Topics outlined below. 
+The Yewno Semantic API enables users to retrieve comprehensive information on topics, subtopics and concepts from any English language item in the relevant portfolio that they have access to. This information has a variety of uses and can be displayed both internally and externally to end users. Overall, the Yewno Sematic API is composed of six related APIs: Concept Search, Concept Metadata, Document Search, Document Metadata and Topics outlined below.
 
 The base url for all endpoints is `https://apis.yewno.com/public`.  All requests must be made over HTTPS as HTTP is not supported.  
 
@@ -73,7 +73,7 @@ POST /auth/refresh
 
 ## Concept Search
 
-Concept search API returns most pertinent concept(s) matched to a query string. It handles misspelled or partial data, as well as synonyms. For every concept returned, the API provides its id within Yewno ecosystem (cid), together with concept title and short definition. Additional metadata for a given yid can be obtained through the Concept Metadata API (see below). We limit the number of returned concepts to 10. 
+Concept search API returns most pertinent concept(s) matched to a query string. It handles misspelled or partial data, as well as synonyms. For every concept returned, the API provides its id within Yewno ecosystem (cid), together with concept title and short definition. Additional metadata for a given yid can be obtained through the Concept Metadata API (see below). We limit the number of returned concepts to 10. The concepts can be filtered by `sources` param.
 
 ```
 GET /concept/search?q=<string>
@@ -82,6 +82,7 @@ GET /concept/search?q=<string>
 | param | type |
 |---|---|
 | q  | string  |
+| sources | string (comma separated ids) |
 
 <details>
 
@@ -152,12 +153,13 @@ GET /concept/search?q=<string>
 
 ## Concept Metadata
 
-Concept metadata returns, for each concept id (cid), additional attributes obtained via Yewno advanced AI processes. These include the topics/subtopics hierarchy together with a percentage for each, definitions and a list of related concept CIDs (up to 10) extracted from multiple sources (depending on the portfolio a particular user has access to).
+Concept metadata returns, for each concept id (cid), additional attributes obtained via Yewno advanced AI processes. These include the topics/subtopics hierarchy together with a percentage for each, definitions and a list of related concept CIDs (up to 10) extracted from multiple sources (depending on the portfolio a particular user has access to). The `sources` param can be used to check if the concept is associated with the sources.
 
 | param | type |
 |---|---|
 | cid | string |
 | related* | integer | 
+| sources | string (comma separated ids) |
 
 \* optional
 
@@ -230,12 +232,14 @@ GET /concept/:cid?related=<int>
 
 ## Document Search
 
-Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, provider and date of publication.  Additional metadata for a given yid can be obtained through the Document Metadata API (see below).
+Document search API returns most relevant document(s) matched to either a concept or a topic/subtopic. For every document returned, the API provides its id within Yewno ecosystem (yid), together with the document title, publisher and date of publication.  Additional metadata for a given yid can be obtained through the Document Metadata API (see below). The each response contains up to ten documents and `hasMore` field that indicates whether there are more documents or not. There is `page` param that can be used to paginate documents. The documents can be filtered by `sources` param.
 
 | param | |
 |---|---|
 | concepts | string (comma separated cids)  |
 | topics | string (comma separated ids) |
+| sources | string (comma separated ids) |
+| page | number (page number, default: 1) |
 
 <details>
 
@@ -246,10 +250,10 @@ GET document/search?concepts=<cids>&topics=<topic_ids>
 {
   "data": [
     {
-      "yId": "a53a456a1443b9f2eba1591e35800734",
-      "stype": "title",
-      "title": "Newsgames",
-      "sourceName": "MIT Press",
+      "yId": "752956a0c3b066c05ee1405664b7a947",
+      "publicationDate": "2018-05-01T00:00:00Z",
+      "publisher": "AIP Publishing",
+      "title": "Neuroscientists network to study the whole brain",
     },
     /* ... */
   ]
@@ -275,29 +279,29 @@ GET /document/:yid
     "text": "Other costs not included by this term are costs of follow-up literature, miscellaneous advertising materials such as circulars, layouts, letterheads, and calling cards, and cost of advertising agency service. ume of response delivered by different publications, although as mentioned, no substantial difference in the quality, when a known piece of copy was used. In those cases where the same copy appeared in different magazines in the same month, the ratio of orders to inquiries8 was quite similar for most magazines. 3. Direct mail inquiries as producers of traceable sales from both old9 and new10 8 The percentage of inquiries which were converted to orders. 9 A buyer whose first order preceded his first inquiry from advertising in the period measured, yet who did inquire from an advertisement or an editorial article, and who bought again after his inquiry was received.",
     "topics": [
       {
-        "topic": "11_1",
-        "probability": 0.8888889
+          "probability": 0.092921354,
+          "subtopics": [
+              {
+                  "probability": 0.019047607,
+                  "topic": "16_31",
+                  "name": "Time Series"
+              },
+              /*...*/
+          ],
+          "topic": "16",
+          "name": "Mathematics"
       },
       {
-        "topic": "11_15",
-        "probability": 0.11111111
-      },
-      {
-        "topic": "12",
-        "children": [
-          {
-            "topic": "12_15",
-            "name": "Publishing",
-            "probability": 0.8322142
-          },
-          {
-            "topic": "12_2",
-            "name": "Communication Studies",
-            "probability": 0.14093931
-          }
-        ],
-        "probability": 0.13186002,
-        "name": "Language Arts"
+          "probability": 0.004424824,
+          "subtopics": [
+              {
+                  "probability": 1.0,
+                  "topic": "21_0",
+                  "name": "Acoustics & Sound"
+              }
+          ],
+          "topic": "21",
+          "name": "Physics"
       },
       /*...*/
     ],
@@ -339,40 +343,6 @@ GET /document/:yid
   },
   /* ... */
 }
-```
-
-</details>
-
-## Document Snippets
-
-Snippets endpoints returns, for each concept id (cid), list of snippets (short portions of documents, up to 180 words) where that concept appears, a relevance score, together with essential metadata information. Additional metadata for a given yid can be obtained through the Document Metadata API (see above) for each document id (yid) returned. Snippet call is paginated (with 10 snippets per page), and we limit the number of returned pages to 100. 
-
-| param | type |
-|-------|------|
-| cid   | string |
-| yids | string (comma separated yids) |
-
-```
-GET /snippets/:cid?yids=<string>
-```
-
-<details>
-
-```
-  "snippets": [
-    {
-      "yId": "d771a5b0bfd40e85efa9b4359d5a5432",
-      "score": 4.0841975,
-      "snippetIndex": 71,
-      "sId": "63fc26375ec2343623661e41d7c5887e",
-      "cmid": "659462e857811336fb48232d96b9e519",
-      "text": " (a) Sketch indicating the rotation of a shuttlecock moving with the cork ahead. Thin blue arrows indicate the drag force on each feather. (b) Rotation velocity R &OHgr; ?> as a function of the translation speed U for a plastic (blue dots) and a feathered shuttlecock (red squares). Shuttlecocks rotate at a velocity such that this torque is balanced by air resistance. The rotational velocity &OHgr; is measured as a function of the projectile speed U , as shown in figure 15 (b). The graph reveals a linear correlation between R &OHgr; ?> and U , and differences between plastic and feather rotational velocities.",
-      "title": "The physics of badminton",
-      "publisher": "IOP Publishing",
-      "summary": "...ed shuttlecock (red squares). Shuttlecocks rotate at a velocity such that this torque is balanced by air resistance. The rotational velocity &OHgr; is measured as a function of the projectile speed U , as shown in figure 15 (b). The graph reveals a linear...",
-      "publicationDate": "2015-06-01T00:00:00Z"
-    }
-  ],
 ```
 
 </details>
